@@ -1,4 +1,5 @@
 from html import escape
+from textwrap import dedent
 from typing import Dict, List, Tuple
 
 import plotly.graph_objects as go
@@ -1013,11 +1014,11 @@ def render_priority_tracks(title: str, tracks: List[Dict[str, object]], tone: st
     kicker_class = {"blue": "kicker-blue", "pink": "kicker-pink", "yellow": "kicker-yellow"}.get(tone, "kicker-pink")
     kicker_html = f'<div class="card-kicker {kicker_class}">{safe_text(kicker)}</div>' if kicker else ""
 
-    blocks = []
+    blocks: List[str] = []
     for idx, track in enumerate(tracks, start=1):
         cases_html = "".join(f"<li>{safe_text(str(item))}</li>" for item in track.get("cases", []))
         steps_html = "".join(f"<li>{safe_text(str(item))}</li>" for item in track.get("steps", []))
-        blocks.append(
+        block_html = dedent(
             f"""
             <div class="mini-card track-card">
                 <div class="track-rank">優先順位 {idx}</div>
@@ -1029,9 +1030,10 @@ def render_priority_tracks(title: str, tracks: List[Dict[str, object]], tone: st
                 <ul class="pretty-list">{steps_html}</ul>
             </div>
             """
-        )
+        ).strip()
+        blocks.append(block_html)
 
-    st.markdown(
+    card_html = dedent(
         f"""
         <div class="card {tone_class}">
             {kicker_html}
@@ -1041,11 +1043,12 @@ def render_priority_tracks(title: str, tracks: List[Dict[str, object]], tone: st
                 <span class="accent">今の経験を価値へ変えやすい</span>順番で並べています。
                 『自分にできるか』が一回で分かるように、案件内容と最初の作業まで具体化しています。
             </div>
-            {''.join(blocks)}
+            {"".join(blocks)}
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        """
+    ).strip()
+
+    st.markdown(card_html, unsafe_allow_html=True)
 
 
 st.title("個別専用キャリア設計図ロードマップ作成")
