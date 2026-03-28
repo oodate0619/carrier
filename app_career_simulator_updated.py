@@ -49,12 +49,71 @@ st.markdown(
         margin-bottom: 16px;
         box-shadow: 0 2px 10px rgba(16, 24, 40, 0.04);
     }}
+    .card-blue {{
+        border-top: 4px solid {COLOR_BLUE};
+        background: linear-gradient(180deg, rgba(64,193,233,0.08) 0%, {COLOR_BG} 22%);
+    }}
+    .card-pink {{
+        border-top: 4px solid {COLOR_PINK};
+        background: linear-gradient(180deg, rgba(241,127,158,0.08) 0%, {COLOR_BG} 22%);
+    }}
+    .card-yellow {{
+        border-top: 4px solid {COLOR_YELLOW};
+        background: linear-gradient(180deg, rgba(249,206,35,0.10) 0%, {COLOR_BG} 22%);
+    }}
+    .card-kicker {{
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 9px;
+        border-radius: 999px;
+        margin-bottom: 10px;
+    }}
+    .kicker-blue {{
+        background: rgba(64,193,233,0.16);
+        color: {COLOR_TEXT};
+    }}
+    .kicker-pink {{
+        background: rgba(241,127,158,0.16);
+        color: {COLOR_TEXT};
+    }}
+    .kicker-yellow {{
+        background: rgba(249,206,35,0.22);
+        color: {COLOR_TEXT};
+    }}
     .mini-card {{
         background: {COLOR_SOFT};
         border: 1px solid {COLOR_BORDER};
         border-radius: 14px;
         padding: 14px 16px;
         margin-bottom: 12px;
+    }}
+    .track-card {{
+        border-left: 5px solid {COLOR_BLUE};
+        background: linear-gradient(180deg, rgba(64,193,233,0.08) 0%, {COLOR_SOFT} 100%);
+    }}
+    .track-card:nth-child(2) {{
+        border-left-color: {COLOR_PINK};
+        background: linear-gradient(180deg, rgba(241,127,158,0.08) 0%, {COLOR_SOFT} 100%);
+    }}
+    .track-card:nth-child(3) {{
+        border-left-color: {COLOR_YELLOW};
+        background: linear-gradient(180deg, rgba(249,206,35,0.14) 0%, {COLOR_SOFT} 100%);
+    }}
+    .pretty-list {{
+        margin: 8px 0 4px 0;
+        padding-left: 18px;
+    }}
+    .pretty-list li {{
+        margin-bottom: 6px;
+        line-height: 1.75;
+        color: {COLOR_TEXT};
+    }}
+    .section-subtitle {{
+        font-size: 15px;
+        font-weight: 700;
+        color: {COLOR_TEXT};
+        margin-bottom: 8px;
     }}
     .compare-wrap {{
         display: grid;
@@ -872,10 +931,15 @@ def build_success_route(
     )
 
 
-def render_result_card(title: str, body: str) -> None:
+
+def render_result_card(title: str, body: str, tone: str = "blue", kicker: str = "") -> None:
+    tone_class = {"blue": "card-blue", "pink": "card-pink", "yellow": "card-yellow"}.get(tone, "card-blue")
+    kicker_class = {"blue": "kicker-blue", "pink": "kicker-pink", "yellow": "kicker-yellow"}.get(tone, "kicker-blue")
+    kicker_html = f'<div class="card-kicker {kicker_class}">{safe_text(kicker)}</div>' if kicker else ""
     st.markdown(
         f"""
-        <div class="card">
+        <div class="card {tone_class}">
+            {kicker_html}
             <h3 style="margin-top:0;">{title}</h3>
             <div class="lead">{body}</div>
         </div>
@@ -884,7 +948,7 @@ def render_result_card(title: str, body: str) -> None:
     )
 
 
-def render_timeline_card(title: str, roadmap: List[Tuple[str, str]]) -> None:
+def render_timeline_card(title: str, roadmap: List[Tuple[str, str]], tone: str = "yellow", kicker: str = "") -> None:
     items_html = ""
     for phase_title, phase_desc in roadmap:
         items_html += f"""
@@ -894,9 +958,14 @@ def render_timeline_card(title: str, roadmap: List[Tuple[str, str]]) -> None:
         </div>
         """
 
+    tone_class = {"blue": "card-blue", "pink": "card-pink", "yellow": "card-yellow"}.get(tone, "card-yellow")
+    kicker_class = {"blue": "kicker-blue", "pink": "kicker-pink", "yellow": "kicker-yellow"}.get(tone, "kicker-yellow")
+    kicker_html = f'<div class="card-kicker {kicker_class}">{safe_text(kicker)}</div>' if kicker else ""
+
     st.markdown(
         f"""
-        <div class="card">
+        <div class="card {tone_class}">
+            {kicker_html}
             <h3 style="margin-top:0;">{title}</h3>
             <div class="timeline">{items_html}</div>
         </div>
@@ -905,10 +974,23 @@ def render_timeline_card(title: str, roadmap: List[Tuple[str, str]]) -> None:
     )
 
 
-def render_compare_card(title: str, left_title: str, left_body: str, right_title: str, right_body: str) -> None:
+def render_compare_card(
+    title: str,
+    left_title: str,
+    left_body: str,
+    right_title: str,
+    right_body: str,
+    tone: str = "yellow",
+    kicker: str = "",
+) -> None:
+    tone_class = {"blue": "card-blue", "pink": "card-pink", "yellow": "card-yellow"}.get(tone, "card-yellow")
+    kicker_class = {"blue": "kicker-blue", "pink": "kicker-pink", "yellow": "kicker-yellow"}.get(tone, "kicker-yellow")
+    kicker_html = f'<div class="card-kicker {kicker_class}">{safe_text(kicker)}</div>' if kicker else ""
+
     st.markdown(
         f"""
-        <div class="card">
+        <div class="card {tone_class}">
+            {kicker_html}
             <h3 style="margin-top:0;">{title}</h3>
             <div class="compare-wrap">
                 <div class="compare-box">
@@ -926,30 +1008,39 @@ def render_compare_card(title: str, left_title: str, left_body: str, right_title
     )
 
 
-def render_priority_tracks(title: str, tracks: List[Dict[str, object]]) -> None:
+def render_priority_tracks(title: str, tracks: List[Dict[str, object]], tone: str = "pink", kicker: str = "") -> None:
+    tone_class = {"blue": "card-blue", "pink": "card-pink", "yellow": "card-yellow"}.get(tone, "card-pink")
+    kicker_class = {"blue": "kicker-blue", "pink": "kicker-pink", "yellow": "kicker-yellow"}.get(tone, "kicker-pink")
+    kicker_html = f'<div class="card-kicker {kicker_class}">{safe_text(kicker)}</div>' if kicker else ""
+
     blocks = []
     for idx, track in enumerate(tracks, start=1):
         cases_html = "".join(f"<li>{safe_text(str(item))}</li>" for item in track.get("cases", []))
         steps_html = "".join(f"<li>{safe_text(str(item))}</li>" for item in track.get("steps", []))
         blocks.append(
             f"""
-            <div class="mini-card">
+            <div class="mini-card track-card">
                 <div class="track-rank">優先順位 {idx}</div>
                 <div class="track-title">{safe_text(str(track['title']))}</div>
                 <div class="lead">{safe_text(str(track['why_high_value']))}</div>
-                <div class="subtle-head">向きやすい案件</div>
-                <div class="lead"><ul>{cases_html}</ul></div>
-                <div class="subtle-head">初心者が最初にやる作業</div>
-                <div class="lead"><ul>{steps_html}</ul></div>
+                <div class="subtle-head accent-blue">向きやすい案件</div>
+                <ul class="pretty-list">{cases_html}</ul>
+                <div class="subtle-head accent">初心者が最初にやる作業</div>
+                <ul class="pretty-list">{steps_html}</ul>
             </div>
             """
         )
 
     st.markdown(
         f"""
-        <div class="card">
+        <div class="card {tone_class}">
+            {kicker_html}
             <h3 style="margin-top:0;">{title}</h3>
-            <div class="lead" style="margin-bottom:12px;">一番上から順に、単価が崩れにくく、今の経験を価値へ変えやすい順番で並べています。『自分にできるか』が一回で分かるように、案件内容と最初の作業まで具体化しています。</div>
+            <div class="lead" style="margin-bottom:12px;">
+                一番上から順に、<span class="accent-blue">単価が崩れにくく</span>、
+                <span class="accent">今の経験を価値へ変えやすい</span>順番で並べています。
+                『自分にできるか』が一回で分かるように、案件内容と最初の作業まで具体化しています。
+            </div>
             {''.join(blocks)}
         </div>
         """,
@@ -1104,7 +1195,7 @@ fig.update_xaxes(title_text="1日に確保できる平均作業時間", showgrid
 st.plotly_chart(fig, use_container_width=True)
 
 income_comment = build_income_outlook_text(target_label, target_income, current_monthly, ideal_monthly, work_hours)
-render_result_card("収益ラインの見通し", income_comment)
+render_result_card("収益ラインの見通し", income_comment, tone="blue", kicker="INCOME LINE")
 
 center_left, center_mid, center_right = st.columns([1, 1.6, 1])
 with center_mid:
@@ -1128,17 +1219,19 @@ if st.session_state.generated:
     st.divider()
     st.markdown("<div class='section-title'>作成結果</div>", unsafe_allow_html=True)
 
-    render_result_card("この働き方が日常に入った後の暮らし", lifestyle)
-    render_result_card("この順番で進むと形になりやすいルート", success_route)
+    render_result_card("この働き方が日常に入った後の暮らし", lifestyle, tone="blue", kicker="LIFESTYLE")
+    render_result_card("成功する人のルート", success_route, tone="pink", kicker="SUCCESS ROUTE")
     render_compare_card(
         "このままだと起こりやすい停滞パターン",
         "何も変えないまま、時間だけが過ぎるパターン",
         risk_pattern_1,
         "少し動くが、自己流で遠回りするパターン",
         risk_pattern_2,
+        tone="yellow",
+        kicker="RISK PATTERN",
     )
-    render_priority_tracks("あなたの経験が高単価な価値に変わる具体的な作業内容", priority_tracks)
-    render_timeline_card("90日ロードマップ", roadmap)
+    render_priority_tracks("あなたの経験が高単価な価値に変わる具体的な作業内容", priority_tracks, tone="pink", kicker="HIGH VALUE WORK")
+    render_timeline_card("90日ロードマップ", roadmap, tone="yellow", kicker="ROADMAP")
 
     long_fig = go.Figure()
     long_fig.add_trace(
@@ -1179,4 +1272,4 @@ if st.session_state.generated:
         f"5年累計では<span class='accent-yellow'>{cumulative_projection[-1]:,}円前後</span>まで積み上がる見立てです。"
         " ここで重要なのは、作業時間だけで伸ばすのではなく、整理・構成・図解・改善提案のように、単価が崩れにくい作業へ寄せることです。"
     )
-    render_result_card("1〜5年の収益見通し", long_summary)
+    render_result_card("1〜5年の収益見通し", long_summary, tone="yellow", kicker="LONG TERM")
